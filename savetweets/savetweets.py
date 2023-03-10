@@ -25,8 +25,8 @@ def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retwee
                 res = requests.get("https://web.archive.org/save/status/user", headers=headers).json()
                 res = res["available"]
                 if res == 0:
-                    print("Internet archive user-session-limit. wait 2 seconds")
-                    sleep(2)
+                    print("Internet archive user-session-limit. wait 5 seconds")
+                    sleep(5)
                 else:
                     break
             payload = {"url":f"https://twitter.com/{target_id}"}
@@ -66,8 +66,8 @@ def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retwee
                     res = requests.get("https://web.archive.org/save/status/user", headers=headers).json()
                     res = res["available"]
                     if res == 0:
-                        print("Internet archive user-session-limit. wait 2 seconds")
-                        sleep(2)
+                        print("Internet archive user-session-limit. wait 5 seconds")
+                        sleep(5)
                     else:
                         break
                 payload = {"url":tweet.url}
