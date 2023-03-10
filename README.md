@@ -30,6 +30,7 @@ options:
   --quotecount QUOTECOUNT
                         Archive only tweets with more quotes than specified number.
   --nocheck             Do not check if archived successfully.
+  --debug               Display debug logs.
 ```
 
 ### Examples
