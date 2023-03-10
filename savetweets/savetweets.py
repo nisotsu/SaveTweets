@@ -9,7 +9,7 @@ import requests
 import snscrape.modules.twitter as sntwitter
 
 
-def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retweet, min_quote):
+def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retweet, min_quote, debug_flag):
     url_and_jobid_list = []
     print("Start archiving")
     print(f"[0]:https://twitter.com/{target_id}")
@@ -37,7 +37,8 @@ def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retwee
                 url_and_jobid_list.append(res_dict)
             break
         except Exception as e:
-            print(traceback.format_exc())
+            if debug_flag:
+                print(traceback.format_exc())
             print("Wait 10 seconds due to error")
             sleep(10)
 
@@ -77,14 +78,15 @@ def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retwee
                     url_and_jobid_list.append(res_dict)
                 break
             except Exception as e:
-                print(traceback.format_exc())
+                if debug_flag:
+                    print(traceback.format_exc())
                 print("Wait 10 seconds due to error")
                 sleep(10)
 
         sleep(5)
     return url_and_jobid_list
 
-def check_archive(access_key, secret, url_and_jobid_list):
+def check_archive(access_key, secret, url_and_jobid_list, debug_flag):
     first_num = 0
     success_num = 0
     failure_num = 0
@@ -114,12 +116,14 @@ def check_archive(access_key, secret, url_and_jobid_list):
                             print(res_dict.get("message"))
                         failure_urls.append(url_and_jobid["url"])
                     elif res_dict.get("status") == "pending":
+                        print(url_and_jobid)
                         url_and_jobid_list.append(url_and_jobid)
                         pgbar.total = len(url_and_jobid_list)
                         sleep(5)
                     break
                 except Exception as e:
-                    print(traceback.format_exc())
+                    if debug_flag:
+                        print(traceback.format_exc())
                     print("Wait 10 seconds due to error")
                     sleep(10)
             pgbar.update(1)
@@ -143,6 +147,7 @@ def main():
     parser.add_argument('--retweetcount', type=int, default=0, help="Archive only tweets with more retweets than specified number.")
     parser.add_argument('--quotecount', type=int, default=0, help="Archive only tweets with more quotes than specified number.")
     parser.add_argument('--nocheck', action="store_false", help="Do not check if archived successfully.")
+    parser.add_argument('--debug', action="store_true", help="Display debug logs.")
     args = parser.parse_args()
 
     if not os.path.isfile(KEYS_PATH):
@@ -157,9 +162,9 @@ def main():
         secret = d["secret"]
     
     url_and_jobid_list = []
-    url_and_jobid_list = archive_tweet(access_key, secret, args.id, args.likecount, args.replycount, args.retweetcount, args.quotecount)
+    url_and_jobid_list = archive_tweet(access_key, secret, args.id, args.likecount, args.replycount, args.retweetcount, args.quotecount, args.debug)
     if args.nocheck:
-        check_archive(access_key, secret, url_and_jobid_list)
+        check_archive(access_key, secret, url_and_jobid_list, args.debug)
     print("Finished")
 
 if __name__ == "__main__":
