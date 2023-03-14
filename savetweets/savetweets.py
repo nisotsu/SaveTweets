@@ -116,7 +116,6 @@ def check_archive(access_key, secret, url_and_jobid_list, debug_flag):
                             print(res_dict.get("message"))
                         failure_urls.append(url_and_jobid["url"])
                     elif res_dict.get("status") == "pending":
-                        print(url_and_jobid)
                         url_and_jobid_list.append(url_and_jobid)
                         pgbar.total = len(url_and_jobid_list)
                         sleep(5)
