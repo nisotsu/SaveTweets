@@ -4,13 +4,17 @@ import json
 import os
 import traceback
 import argparse
+import datetime
 from tqdm import tqdm
 import requests
 import snscrape.modules.twitter as sntwitter
 
 
-def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retweet, min_quote, debug_flag):
+def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retweet, min_quote, debug_flag, since_date, until_date):
     url_and_jobid_list = []
+    
+    since_date = datetime.datetime.strptime(since_date, "%Y-%m-%d").date()
+    until_date = datetime.datetime.strptime(until_date, "%Y-%m-%d").date()
     print("Start archiving")
     print(f"[0]:https://twitter.com/{target_id}")
     MAX_ERROR_COUNT = 10
@@ -45,13 +49,23 @@ def archive_tweet(access_key, secret, target_id, min_like, min_reply, min_retwee
     tweets = sntwitter.TwitterUserScraper(target_id).get_items()
     for i,tweet in enumerate(tweets):
         if tweet.likeCount < min_like:
+            print(f"[{i+1}]: Skipped. likecount < {min_like}")
             continue
         if tweet.replyCount < min_reply:
+            print(f"[{i+1}]: Skipped. replycount < {min_reply}")
             continue
         if tweet.retweetCount < min_retweet:
+            print(f"[{i+1}]: Skipped. retweetcount < {min_retweet}")
             continue
         if tweet.quoteCount < min_quote:
+            print(f"[{i+1}]: Skipped. quotecount < {min_quote}")
             continue
+        if tweet.date.date() > until_date:
+            print(f"[{i+1}]: Skipped. tweetdate > {until_date}")
+            continue
+        if tweet.date.date() < since_date:
+            print(f"[{i+1}]: Skipped. tweetdate < {since_date}")
+            break
 
         print(f"[{i+1}]:{tweet.url}")
         MAX_ERROR_COUNT = 10
@@ -145,6 +159,8 @@ def main():
     parser.add_argument('--replycount', type=int, default=0, help="Archive only tweets with more replies than specified number.")
     parser.add_argument('--retweetcount', type=int, default=0, help="Archive only tweets with more retweets than specified number.")
     parser.add_argument('--quotecount', type=int, default=0, help="Archive only tweets with more quotes than specified number.")
+    parser.add_argument('--since', default="0001-01-01", help="Archive only tweets after the specified date. yyyy-mm-dd.")
+    parser.add_argument('--until', default="9999-12-31", help="Archive only tweets before the specified date. yyyy-mm-dd.")
     parser.add_argument('--nocheck', action="store_false", help="Do not check if archived successfully.")
     parser.add_argument('--debug', action="store_true", help="Display debug logs.")
     args = parser.parse_args()
@@ -161,7 +177,7 @@ def main():
         secret = d["secret"]
     
     url_and_jobid_list = []
-    url_and_jobid_list = archive_tweet(access_key, secret, args.id, args.likecount, args.replycount, args.retweetcount, args.quotecount, args.debug)
+    url_and_jobid_list = archive_tweet(access_key, secret, args.id, args.likecount, args.replycount, args.retweetcount, args.quotecount, args.debug, args.since, args.until)
     if args.nocheck:
         check_archive(access_key, secret, url_and_jobid_list, args.debug)
     print("Finished")
