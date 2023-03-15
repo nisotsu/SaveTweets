@@ -29,6 +29,8 @@ options:
                         Archive only tweets with more retweets than specified number.
   --quotecount QUOTECOUNT
                         Archive only tweets with more quotes than specified number.
+  --since SINCE         Archive only tweets after the specified date. yyyy-mm-dd.
+  --until UNTIL         Archive only tweets before the specified date. yyyy-mm-dd.
   --nocheck             Do not check if archived successfully.
   --debug               Display debug logs.
 ```
