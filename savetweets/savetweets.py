@@ -134,6 +134,13 @@ def check_archive(access_key, secret, url_and_jobid_list, debug_flag):
                         pgbar.total = len(url_and_jobid_list)
                         sleep(5)
                     break
+                except KeyboardInterrupt as e:
+                    print(f"success:{success_num} first-archive:{first_num} failure:{failure_num}")
+                    if failure_num > 0:
+                        print("failure urls")
+                        for url in failure_urls:
+                            print(url)
+                    raise KeyboardInterrupt
                 except Exception as e:
                     if debug_flag:
                         print(traceback.format_exc())
